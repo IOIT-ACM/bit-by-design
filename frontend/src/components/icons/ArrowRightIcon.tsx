@@ -1,6 +1,6 @@
 import type { IconProps } from "./types";
 
-export function LoginIcon({ className = "", size = 13 }: IconProps) {
+export function ArrowRightIcon({ className = "", size = 14 }: IconProps) {
 	return (
 		<svg
 			className={className}
@@ -13,9 +13,8 @@ export function LoginIcon({ className = "", size = 13 }: IconProps) {
 			strokeLinecap="round"
 			strokeLinejoin="round"
 		>
-			<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-			<polyline points="10,17 15,12 10,7" />
-			<line x1="15" y1="12" x2="3" y2="12" />
+			<path d="M5 12h14" />
+			<path d="m12 5 7 7-7 7" />
 		</svg>
 	);
 }

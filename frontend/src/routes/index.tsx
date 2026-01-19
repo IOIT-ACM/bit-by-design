@@ -1,7 +1,11 @@
-import { useRef, useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import gsap from "gsap";
-import { AuthButton, CountdownTimer, CountdownLabels } from "../components/ui";
+import { DashboardLayout } from "../components/layouts";
+import { SubmissionsBackground } from "../components/ui";
+import {
+	CountdownView,
+	CompetitionOverView,
+	SubmissionsOpenView,
+} from "../components/views";
 import { useCountdown } from "../hooks";
 
 export const Route = createFileRoute("/")({
@@ -9,80 +13,48 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-	const { hours, minutes, seconds, isLoading, state, label, isExpired } =
-		useCountdown();
+	const { hours, minutes, seconds, isLoading, state, label } = useCountdown();
 
-	const contentRef = useRef<HTMLDivElement>(null);
-	const timerRef = useRef<HTMLDivElement>(null);
-	const labelsRef = useRef<HTMLDivElement>(null);
+	// Determine background based on state
+	const background =
+		state === "submissions_open" ? <SubmissionsBackground /> : undefined;
 
-	useEffect(() => {
-		const tl = gsap.timeline();
+	// Render appropriate view based on competition state
+	const renderContent = () => {
+		if (isLoading) {
+			return (
+				<CountdownView
+					label="Loading..."
+					hours={0}
+					minutes={0}
+					seconds={0}
+					isLoading
+				/>
+			);
+		}
 
-		tl.fromTo(
-			contentRef.current,
-			{ opacity: 0, y: 20 },
-			{ opacity: 1, y: 0, duration: 0.6, ease: "power2.out" },
-		);
+		switch (state) {
+			case "competition_over":
+				return <CompetitionOverView />;
 
-		tl.fromTo(
-			timerRef.current,
-			{ opacity: 0, scale: 0.95 },
-			{ opacity: 1, scale: 1, duration: 0.5, ease: "power2.out" },
-			"-=0.3",
-		);
+			case "submissions_open":
+				return <SubmissionsOpenView hours={hours} minutes={minutes} />;
 
-		tl.fromTo(
-			labelsRef.current,
-			{ opacity: 0 },
-			{ opacity: 1, duration: 0.4, ease: "power2.out" },
-			"-=0.2",
-		);
-	}, []);
-
-	// Show leaderboard when competition is over
-	if (state === "competition_over" && !isLoading) {
-		return (
-			<div className="flex flex-col items-center justify-center min-h-screen px-4">
-				<div className="absolute top-6 sm:top-[60px] left-1/2 -translate-x-1/2 z-10">
-					<AuthButton />
-				</div>
-				<div ref={contentRef} className="text-center" style={{ opacity: 0 }}>
-					<p className="font-['Figtree',sans-serif] font-normal text-xl sm:text-2xl md:text-[32px] text-white mb-4 sm:mb-6">
-						Competition has ended!
-					</p>
-					<p className="font-['Figtree',sans-serif] text-lg text-white/70">
-						Leaderboard coming soon...
-					</p>
-				</div>
-			</div>
-		);
-	}
+			case "voting_open":
+			case "waiting_for_submissions":
+			default:
+				return (
+					<CountdownView
+						label={label}
+						hours={hours}
+						minutes={minutes}
+						seconds={seconds}
+					/>
+				);
+		}
+	};
 
 	return (
-		<div className="flex flex-col items-center justify-center min-h-screen px-4">
-			{/* Auth button - positioned at top center */}
-			<div className="absolute top-6 sm:top-[60px] left-1/2 -translate-x-1/2 z-10">
-				<AuthButton />
-			</div>
-
-			{/* Main content */}
-			<div ref={contentRef} className="text-center" style={{ opacity: 0 }}>
-				<p className="font-['Figtree',sans-serif] font-normal text-xl sm:text-2xl md:text-[32px] text-white mb-4 sm:mb-6">
-					{label}
-				</p>
-
-				<CountdownTimer
-					ref={timerRef}
-					hours={hours}
-					minutes={minutes}
-					seconds={seconds}
-					isLoading={isLoading}
-					style={{ opacity: 0 }}
-				/>
-
-				<CountdownLabels ref={labelsRef} style={{ opacity: 0 }} />
-			</div>
-		</div>
+		<DashboardLayout background={background}>{renderContent()}</DashboardLayout>
 	);
 }

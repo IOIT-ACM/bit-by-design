@@ -19,4 +19,10 @@ body {
     padding: 0;
 }
 
+/* Step animation items - hidden when transitioning to prevent flash */
+.transitioning .step-animate-item {
+    opacity: 0;
+    transform: translateY(12px);
+}
+
 /* GSAP handles all animations. CSS transitions for hover states only. */

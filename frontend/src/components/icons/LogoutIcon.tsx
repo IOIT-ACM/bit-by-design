@@ -1,13 +1,11 @@
-interface LogoutIconProps {
-	className?: string;
-}
+import type { IconProps } from "./types";
 
-export function LogoutIcon({ className = "" }: LogoutIconProps) {
+export function LogoutIcon({ className = "", size = 13 }: IconProps) {
 	return (
 		<svg
 			className={className}
-			width="13"
-			height="13"
+			width={size}
+			height={size}
 			viewBox="0 0 24 24"
 			fill="none"
 			stroke="currentColor"
