@@ -2,7 +2,7 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { Spinner } from "./Spinner";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-	variant?: "primary" | "secondary" | "resend" | "resend-error";
+	variant?: "primary" | "secondary" | "resend" | "resend-error" | "logout";
 	isLoading?: boolean;
 	children: ReactNode;
 }
@@ -16,6 +16,8 @@ const variantClasses = {
 		"bg-[#f5f5f5] border-[#c4c4c4] shadow-[0px_1px_0px_0px_#ddd] text-[#656565] hover:bg-[#eaeaea] hover:shadow-[0px_2px_4px_0px_rgba(0,0,0,0.1)] active:scale-[0.98]",
 	"resend-error":
 		"bg-[#f6d9d9] border-[#a22121] shadow-[0px_1px_0px_0px_rgba(162,33,33,0.26)] text-[#7b1e1e] hover:bg-[#f0c7c7] hover:shadow-[0px_2px_4px_0px_rgba(162,33,33,0.2)] active:scale-[0.98]",
+	logout:
+		"bg-[#1a1a1a] border-[#7e7e7e] px-10 shadow-[0px_1px_0px_0px_#7e7e7e] text-[#7e7e7e] hover:bg-[#252525] hover:border-[#999] hover:text-[#999] active:scale-[0.98]",
 };
 
 export function Button({

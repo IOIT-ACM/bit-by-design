@@ -1,12 +1,17 @@
 import { useCallback, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { useRequestOtp, useResendOtp, useVerifyOtp } from "../api";
+import {
+    type LoginResponse,
+    useRequestOtp,
+    useResendOtp,
+    useVerifyOtp,
+} from "../api";
 
 export type LoginStep = "email" | "otp";
 
 export interface UseLoginFlowOptions {
     onStepChange?: (step: LoginStep) => void;
-    onSuccess?: (token: string) => void;
+    onSuccess?: (response: LoginResponse) => void;
 }
 
 export function useLoginFlow(options: UseLoginFlowOptions = {}) {
@@ -61,8 +66,7 @@ export function useLoginFlow(options: UseLoginFlowOptions = {}) {
         try {
             const result = await verifyOtpMutation.mutateAsync({ email, otp });
             if (result.token) {
-                localStorage.setItem("auth_token", result.token);
-                options.onSuccess?.(result.token);
+                options.onSuccess?.(result);
                 return result.token;
             }
             return null;
@@ -114,8 +118,8 @@ export function useLoginFlow(options: UseLoginFlowOptions = {}) {
 
     const updateOtp = useCallback(
         (value: string) => {
-            // Only allow digits
-            const sanitized = value.replace(/\D/g, "");
+            // Only allow alphanumeric characters
+            const sanitized = value.replace(/[^a-zA-Z0-9]/g, "");
             setOtp(sanitized);
             if (verifyOtpMutation.isError) {
                 verifyOtpMutation.reset();

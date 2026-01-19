@@ -10,7 +10,7 @@ import {
 	ResendButton,
 	AuthLayout,
 } from "../components";
-import { useLoginFlow, useLoginAnimations } from "../hooks";
+import { useLoginFlow, useLoginAnimations, useAuth } from "../hooks";
 
 const DESCRIPTIONS = {
 	email: "Use your registered email address from unstop.",
@@ -22,10 +22,16 @@ const RESEND_SUCCESS_TIMEOUT = 3000;
 function LoginPage() {
 	const navigate = useNavigate();
 	const [shake, setShake] = useState(false);
+	const { setAuth } = useAuth();
 
 	const animations = useLoginAnimations();
 	const login = useLoginFlow({
-		onSuccess: () => {
+		onSuccess: (response) => {
+			setAuth(response.token, {
+				pid: response.pid,
+				email: response.email,
+				name: response.name,
+			});
 			animations.animateSuccessExit(() => {
 				navigate({ to: "/" });
 			});
