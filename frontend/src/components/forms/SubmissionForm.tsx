@@ -184,7 +184,8 @@ export function SubmissionForm({
 					if (!contentRef.current) return;
 
 					// Get all animatable elements in the new step
-					const elements = contentRef.current.querySelectorAll(".step-animate-item");
+					const elements =
+						contentRef.current.querySelectorAll(".step-animate-item");
 
 					if (elements.length > 0) {
 						// Stagger animate child elements (they start hidden via CSS)
