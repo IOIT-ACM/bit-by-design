@@ -52,14 +52,14 @@ mailer:
     # Enable/Disable smtp mailer.
     enable: true
     # SMTP server host. e.x localhost, smtp.gmail.com
-    host: localhost
+    host: {{ get_env(name="MAILER_HOST", default="smtp.resend.com")}}
     # SMTP server port
-    port: 1025
+    port: {{ get_env(name="MAILER_PORT", default=587)}}
     # Use secure connection (SSL/TLS).
-    secure: false
-    # auth:
-    #   user:
-    #   password:
+    secure: {{ get_env(name="MAILER_SECURE", default=true)}}
+    auth:
+       user: {{ get_env(name="MAILER_AUTH_USER", default="resend")}}
+       password: {{ get_env(name="MAILER_AUTH_PASSWORD")}}
     # Override the SMTP hello name (default is the machine's hostname)
     # hello_name:
 
@@ -96,6 +96,6 @@ auth:
   # JWT authentication
   jwt:
     # Secret key for token generation and verification
-    secret: yGVFqvkn7ltHeJ1mwLCN
+    secret: {{ get_env(name="JWT_SECRET") }} 
     # Token expiration time in seconds
     expiration: 604800 # 7 days

@@ -420,6 +420,7 @@ dependencies = [
  "axum",
  "axum-extra",
  "chrono",
+ "dotenvy",
  "include_dir",
  "insta",
  "loco-rs",
