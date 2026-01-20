@@ -43,7 +43,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 	}, []);
 
 	return (
-		<div className="bg-[#101010] min-h-screen w-full relative overflow-hidden">
+		<div className="bg-[#101010] min-h-screen w-full relative overflow-y-auto scroll-smooth">
 			{/* Subtle gradient background */}
 			<div className="absolute inset-0 bg-linear-to-br from-[#101010] via-[#151515] to-[#101010] pointer-events-none" />
 
