@@ -5,6 +5,7 @@ import {
 	CountdownView,
 	CompetitionOverView,
 	SubmissionsOpenView,
+	CompetitionInstructions,
 } from "../components/views";
 import { useCountdown } from "../hooks";
 
@@ -55,6 +56,14 @@ function Index() {
 	};
 
 	return (
-		<DashboardLayout background={background}>{renderContent()}</DashboardLayout>
+		<DashboardLayout background={background}>
+		<div className="flex flex-col items-center">
+			{renderContent()}
+			
+			{(state === "waiting_for_submissions" || state === "submissions_open") && (
+			<CompetitionInstructions />
+			)}
+		</div>
+		</DashboardLayout>
 	);
 }
