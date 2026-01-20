@@ -135,7 +135,7 @@ function LoginPage() {
 												rel="noopener noreferrer"
 												className="font-bold underline hover:text-[#a22121] transition-colors"
 											>
-												Sarvesh Kolthe
+												Sarvesh Kolte
 											</a>
 										</p>
 									</div>
