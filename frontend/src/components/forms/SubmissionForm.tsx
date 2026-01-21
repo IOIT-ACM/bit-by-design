@@ -11,6 +11,10 @@ import {
 	Checkbox,
 } from "../ui";
 import { ArrowRightIcon, ChevronLeftIcon } from "../icons";
+import { useAuth } from "../../hooks/useAuth";
+import { useCreateSubmission, useUpdateSubmission } from "../../api";
+import { uploadToCloudinary } from "../../lib/cloudinary";
+import { toast } from "react-hot-toast";
 
 // Form data structure
 export interface SubmissionFormData {
@@ -43,8 +47,12 @@ const initialFormData: SubmissionFormData = {
 
 interface SubmissionFormProps {
 	timeRemaining: string;
-	onSubmit?: (data: SubmissionFormData) => void;
+	onSubmit?: (data: SubmissionFormData, imageUrl?: string) => void;
 	isSubmitting?: boolean;
+	initialData?: Partial<SubmissionFormData>;
+	initialImageUrl?: string;
+	existingSubmissionId?: number;
+	onCancel?: () => void;
 }
 
 const TOTAL_STEPS = 4;
@@ -119,15 +127,30 @@ export function SubmissionForm({
 	timeRemaining,
 	onSubmit,
 	isSubmitting = false,
+	initialData,
+	initialImageUrl,
+	existingSubmissionId,
+	onCancel,
 }: SubmissionFormProps) {
-	const [formData, setFormData] = useState<SubmissionFormData>(initialFormData);
+	const [formData, setFormData] = useState<SubmissionFormData>({
+		...initialFormData,
+		...initialData,
+	});
 	const [currentStep, setCurrentStep] = useState(1);
 	const [errors, setErrors] = useState<Record<string, boolean>>({});
 	const [isTransitioning, setIsTransitioning] = useState(false);
+	const [currentImageUrl, setCurrentImageUrl] = useState<string | undefined>(initialImageUrl);
 
 	const containerRef = useRef<HTMLDivElement>(null);
 	const cardRef = useRef<HTMLDivElement>(null);
 	const contentRef = useRef<HTMLDivElement>(null);
+
+	const { isAuthenticated, user } = useAuth();
+	const createSubmission = useCreateSubmission();
+	const updateSubmission = useUpdateSubmission();
+
+	const isEditing = !!existingSubmissionId;
+	const isMutating = createSubmission.isPending || updateSubmission.isPending;
 
 	// Entrance animation
 	useEffect(() => {
@@ -257,19 +280,60 @@ export function SubmissionForm({
 		}
 	};
 
-	const handleSubmit = (e: React.FormEvent) => {
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 
-		// Validate final step
-		if (!validateStep3(formData)) {
-			setErrors({
-				originalityConfirmed: !formData.originalityConfirmed,
-				templateComplianceConfirmed: !formData.templateComplianceConfirmed,
-			});
+		// Step 4 is optional - no validation needed
+		// Step 3 validation already passed to get here
+
+		if (!user) {
+			toast.error("You must be logged in to submit.");
 			return;
 		}
 
-		onSubmit?.(formData);
+		try {
+			// Upload image only if a new file was selected
+			let imageUrl = currentImageUrl || "";
+			if (formData.designImage) {
+				const uploadToastId = toast.loading("Uploading design image...");
+				try {
+					const uploadRes = await uploadToCloudinary(formData.designImage);
+					imageUrl = uploadRes.secure_url;
+					setCurrentImageUrl(imageUrl);
+					toast.success("Image uploaded!", { id: uploadToastId });
+				} catch {
+					toast.error("Failed to upload image. Please try again.", { id: uploadToastId });
+					return;
+				}
+			}
+
+			const submissionData = {
+				figma_link: formData.figmaLink,
+				design_image: imageUrl,
+				target_user_and_goal: formData.targetUserAndGoal,
+				layout_explanation: formData.layoutExplanation,
+				style_interpretation: formData.styleInterpretation,
+				key_trade_off: formData.keyTradeOff,
+				originality_confirmed: formData.originalityConfirmed,
+				template_compliance_confirmed: formData.templateComplianceConfirmed,
+				future_improvements: formData.futureImprovements || undefined,
+			};
+
+			if (isEditing && existingSubmissionId) {
+				await updateSubmission.mutateAsync({
+					id: existingSubmissionId,
+					data: submissionData,
+				});
+				toast.success("Submission updated!");
+			} else {
+				await createSubmission.mutateAsync(submissionData);
+				toast.success("Submission received!");
+			}
+
+			onSubmit?.(formData, imageUrl);
+		} catch {
+			toast.error(isEditing ? "Failed to update. Please try again." : "Failed to submit. Please try again.");
+		}
 	};
 
 	const isCurrentStepValid = stepValidators[currentStep - 1](formData);
@@ -318,6 +382,20 @@ export function SubmissionForm({
 			{/* Submission card */}
 			<div ref={cardRef} style={{ opacity: 0 }}>
 				<Card animate={false} className="w-[380px] max-w-[calc(100vw-32px)]">
+					{!isAuthenticated ? (
+						<div className="flex flex-col items-center justify-center py-8 gap-4">
+							<p className="text-center font-['Figtree',sans-serif] text-sm text-[#bababa]">
+								Please log in to submit your design.
+							</p>
+							<Button 
+								variant="primary" 
+								onClick={() => window.location.href = '/login'} // Or use navigate if available/passed
+								className="w-full max-w-[200px]"
+							>
+								Log In
+							</Button>
+						</div>
+					) : (
 					<form onSubmit={handleSubmit} className="flex flex-col gap-4">
 						{/* Step indicator */}
 						<StepIndicator currentStep={currentStep} totalSteps={TOTAL_STEPS} />
@@ -367,6 +445,7 @@ export function SubmissionForm({
 											onChange={(file) => updateField("designImage", file)}
 											accept="image/png,image/jpeg"
 											disabled={isSubmitting}
+											previewUrl={initialImageUrl}
 										/>
 										<p className="mt-1 text-xs text-[#bababa] font-['Figtree',sans-serif]">
 											PNG or JPG for quick preview during voting
@@ -511,12 +590,24 @@ export function SubmissionForm({
 
 						{/* Navigation buttons */}
 						<div className="flex gap-3 mt-2">
+							{onCancel && currentStep === 1 && (
+								<Button
+									type="button"
+									variant="secondary"
+									onClick={onCancel}
+									disabled={isMutating}
+									className="w-auto px-6"
+								>
+									Cancel
+								</Button>
+							)}
+
 							{currentStep > 1 && (
 								<Button
 									type="button"
 									variant="secondary"
 									onClick={handlePrev}
-									disabled={isSubmitting}
+									disabled={isMutating}
 									className="w-auto px-6"
 								>
 									<ChevronLeftIcon className="mr-1" />
@@ -528,12 +619,12 @@ export function SubmissionForm({
 								<Button
 									type="submit"
 									variant="primary"
-									isLoading={isSubmitting}
-									disabled={!validateStep3(formData)}
-									className="flex-1 px-6"
+									isLoading={isMutating}
+									disabled={isMutating}
+									className="flex-1 px-6 whitespace-nowrap"
 								>
-									Submit
-									{!isSubmitting && <ArrowRightIcon className="ml-2" />}
+									{isEditing ? "Update" : "Submit"}
+									{!isMutating && <ArrowRightIcon className="ml-2" />}
 								</Button>
 							) : (
 								<Button
@@ -543,9 +634,7 @@ export function SubmissionForm({
 									disabled={!isCurrentStepValid}
 									className="flex-1 px-6 whitespace-nowrap"
 								>
-									{currentStep === TOTAL_STEPS - 1
-										? "Review & Submit"
-										: "Continue"}
+									Continue
 									<ArrowRightIcon className="ml-2" />
 								</Button>
 							)}
@@ -556,7 +645,7 @@ export function SubmissionForm({
 							Step {currentStep} of {TOTAL_STEPS}
 							{currentStep === 4 && " (Optional)"}
 						</p>
-					</form>
+					</form>)}
 				</Card>
 			</div>
 		</div>

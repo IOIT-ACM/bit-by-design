@@ -21,3 +21,6 @@ export {
     getCompetitionStatus,
     useCompetitionConfig,
 } from "./config";
+
+export * from "./submissions";
+

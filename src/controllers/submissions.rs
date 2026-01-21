@@ -22,7 +22,6 @@ pub struct Params {
     pub originality_confirmed: bool,
     pub template_compliance_confirmed: bool,
     pub future_improvements: Option<String>,
-    pub user_id: i32,
 }
 
 impl Params {
@@ -36,7 +35,6 @@ impl Params {
         item.originality_confirmed = Set(self.originality_confirmed);
         item.template_compliance_confirmed = Set(self.template_compliance_confirmed);
         item.future_improvements = Set(self.future_improvements.clone());
-        item.user_id = Set(self.user_id);
     }
 }
 
@@ -65,6 +63,7 @@ pub async fn add(
     let mut item = ActiveModel {
         ..Default::default()
     };
+    item.user_id = Set(user.id);
     params.update(&mut item);
     let item = item.insert(&ctx.db).await?;
     format::json(item)
@@ -98,16 +97,28 @@ pub async fn get_one(
     let user = users::Model::find_by_pid(&ctx.db, &auth.claims.pid).await?;
     let is_admin = admins::Model::is_admin(&ctx.db, user.id).await?;
     let item = load_item(&ctx, id).await?;
-    if (item.user_id != user.id && !is_admin) {
+    if item.user_id != user.id && !is_admin {
         return unauthorized("unauthorized access.");
     }
     format::json(item)
+}
+
+#[debug_handler]
+pub async fn get_mine(auth: auth::JWT, State(ctx): State<AppContext>) -> Result<Response> {
+    let user = users::Model::find_by_pid(&ctx.db, &auth.claims.pid).await?;
+    let item = submissions::Model::find_by_userid(&ctx.db, user.id).await?;
+    if let Some(item) = item {
+        format::json(item)
+    } else {
+        Err(Error::NotFound)
+    }
 }
 
 pub fn routes() -> Routes {
     Routes::new()
         .prefix("api/submissions/")
         .add("/", post(add))
+        .add("/mine", get(get_mine))
         .add("{id}", get(get_one))
         .add("{id}", put(update))
         .add("{id}", patch(update))

@@ -44,43 +44,9 @@ export interface CurrentUserResponse {
 // --- Utilities ---
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function apiFetch<T>(
-    endpoint: string,
-    options: {
-        method?: "GET" | "POST";
-        data?: unknown;
-        token?: string;
-    } = {},
-): Promise<T> {
-    const { method = "POST", data, token } = options;
+import { apiFetch } from "./client";
 
-    const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-    };
 
-    if (token) {
-        headers.Authorization = `Bearer ${token}`;
-    }
-
-    const response = await fetch(`${CONFIG.apiBaseUrl}/api${endpoint}`, {
-        method,
-        headers,
-        body: data ? JSON.stringify(data) : undefined,
-    });
-
-    if (!response.ok) {
-        const error = await response.json().catch(() => ({}));
-        throw new Error(error.message || error.error || "Request failed");
-    }
-
-    // Handle empty responses
-    const text = await response.text();
-    if (!text) {
-        return {} as T;
-    }
-
-    return JSON.parse(text);
-}
 
 // --- API Functions ---
 

@@ -24,7 +24,7 @@ export function FileUpload({
 	const [isDragOver, setIsDragOver] = useState(false);
 	const [localPreview, setLocalPreview] = useState<string | null>(null);
 
-	const preview = previewUrl || localPreview;
+	const preview = localPreview || previewUrl;
 
 	const handleFileChange = useCallback(
 		(file: File | null) => {
