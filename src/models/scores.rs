@@ -1,9 +1,6 @@
-use crate::models::_entities::submissions::Column;
-use loco_rs::model::{self, ModelResult};
 use sea_orm::entity::prelude::*;
-
-pub use super::_entities::submissions::{ActiveModel, Entity, Model};
-pub type Submissions = Entity;
+pub use super::_entities::scores::{ActiveModel, Model, Entity};
+pub type Scores = Entity;
 
 #[async_trait::async_trait]
 impl ActiveModelBehavior for ActiveModel {
@@ -22,22 +19,7 @@ impl ActiveModelBehavior for ActiveModel {
 }
 
 // implement your read-oriented logic here
-impl Model {
-    pub async fn find_by_userid(
-        db: &DatabaseConnection,
-        user_id: i32,
-    ) -> ModelResult<Option<Self>> {
-        let submission = Entity::find()
-            .filter(
-                model::query::condition()
-                    .eq(Column::UserId, user_id)
-                    .build(),
-            )
-            .one(db)
-            .await?;
-        Ok(submission)
-    }
-}
+impl Model {}
 
 // implement your write-oriented logic here
 impl ActiveModel {}

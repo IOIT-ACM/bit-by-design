@@ -11,6 +11,7 @@ mod m20260119_185727_admins;
 mod m20260121_081258_submissions;
 mod m20260123_163309_vote_assignments;
 mod m20260123_172521_votes;
+mod m20260123_214643_scores;
 pub struct Migrator;
 
 #[async_trait::async_trait]
@@ -26,6 +27,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20260121_081258_submissions::Migration),
             Box::new(m20260123_163309_vote_assignments::Migration),
             Box::new(m20260123_172521_votes::Migration),
+            Box::new(m20260123_214643_scores::Migration),
             // inject-above (do not remove this comment)
         ]
     }

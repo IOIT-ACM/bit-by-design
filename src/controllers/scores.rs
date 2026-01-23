@@ -4,21 +4,28 @@
 use loco_rs::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::models::{
-    _entities::vote_assignments::{self, ActiveModel, Entity, Model},
-    users,
-};
+use crate::models::_entities::scores::{ActiveModel, Entity, Model};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Params {
-    pub user_id: i32,
     pub submission_id: i32,
+    pub problem_fit_score: i32,
+    pub visual_clarity_score: i32,
+    pub style_interpretation_score: i32,
+    pub originality_score: i32,
+    pub overall_quality_score: i32,
+    pub final_score: i32,
 }
 
 impl Params {
     fn update(&self, item: &mut ActiveModel) {
-        item.user_id = Set(self.user_id);
         item.submission_id = Set(self.submission_id);
+        item.problem_fit_score = Set(self.problem_fit_score);
+        item.visual_clarity_score = Set(self.visual_clarity_score);
+        item.style_interpretation_score = Set(self.style_interpretation_score);
+        item.originality_score = Set(self.originality_score);
+        item.overall_quality_score = Set(self.overall_quality_score);
+        item.final_score = Set(self.final_score);
     }
 }
 
@@ -28,15 +35,8 @@ async fn load_item(ctx: &AppContext, id: i32) -> Result<Model> {
 }
 
 #[debug_handler]
-pub async fn mine(auth: auth::JWT, State(ctx): State<AppContext>) -> Result<Response> {
-    let user = users::Model::find_by_pid(&ctx.db, &auth.claims.pid).await?;
-
-    format::json(
-        Entity::find()
-            .filter(vote_assignments::Column::UserId.eq(user.id))
-            .all(&ctx.db)
-            .await?,
-    )
+pub async fn list(State(ctx): State<AppContext>) -> Result<Response> {
+    format::json(Entity::find().all(&ctx.db).await?)
 }
 
 #[debug_handler]
@@ -74,7 +74,5 @@ pub async fn get_one(Path(id): Path<i32>, State(ctx): State<AppContext>) -> Resu
 }
 
 pub fn routes() -> Routes {
-    Routes::new()
-        .prefix("api/vote_assignments/")
-        .add("/mine", get(mine))
+    Routes::new().prefix("api/scores/").add("/", get(list))
 }

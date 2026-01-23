@@ -21,6 +21,7 @@ export interface CompetitionConfig {
 export type CompetitionState =
     | "waiting_for_submissions" // Before submission_start
     | "submissions_open" // Between submission_start and submission_end
+    | "waiting_for_voting" // Between submission_end and voting_start
     | "voting_open" // Between voting_start and voting_end
     | "competition_over"; // After voting_end (show leaderboard)
 
@@ -123,7 +124,7 @@ export function getCompetitionStatus(
     if (votingStart && now < votingStart) {
         // Between submission end and voting start
         return {
-            state: "submissions_open", // Show as submissions closed, waiting for voting
+            state: "waiting_for_voting",
             config,
             countdown: {
                 targetDate: config.voting_start,

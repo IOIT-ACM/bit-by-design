@@ -3,9 +3,11 @@
 #![allow(clippy::unused_async)]
 use loco_rs::controller::extractor::auth;
 use loco_rs::prelude::*;
+use sea_orm::{Condition, Related};
 use serde::{Deserialize, Serialize};
 
 use crate::models::{
+    _entities::vote_assignments,
     admins,
     submissions::{self, ActiveModel, Entity, Model},
     users,
@@ -97,7 +99,15 @@ pub async fn get_one(
     let user = users::Model::find_by_pid(&ctx.db, &auth.claims.pid).await?;
     let is_admin = admins::Model::is_admin(&ctx.db, user.id).await?;
     let item = load_item(&ctx, id).await?;
-    if item.user_id != user.id && !is_admin {
+    let assignment = vote_assignments::Entity::find()
+        .filter(
+            Condition::all()
+                .add(vote_assignments::Column::UserId.eq(user.id))
+                .add(vote_assignments::Column::SubmissionId.eq(item.id)),
+        )
+        .one(&ctx.db)
+        .await?;
+    if item.user_id != user.id && !is_admin && assignment.is_none() {
         return unauthorized("unauthorized access.");
     }
     format::json(item)

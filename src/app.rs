@@ -47,6 +47,7 @@ impl Hooks for App {
 
     fn routes(_ctx: &AppContext) -> AppRoutes {
         AppRoutes::with_default_routes() // controller routes below
+            .add_route(controllers::scores::routes())
             .add_route(controllers::votes::routes())
             .add_route(controllers::vote_assignments::routes())
             .add_route(controllers::submissions::routes())
@@ -60,6 +61,9 @@ impl Hooks for App {
 
     #[allow(unused_variables)]
     fn register_tasks(tasks: &mut Tasks) {
+        tasks.register(tasks::assign_submissions::AssignSubmissions);
+        tasks.register(tasks::clear_assignments::ClearAssignments);
+        tasks.register(tasks::gen_leaderboard::GenLeaderboard);
         // tasks-inject (do not remove)
     }
     async fn truncate(ctx: &AppContext) -> Result<()> {

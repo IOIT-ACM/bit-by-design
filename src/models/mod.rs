@@ -5,3 +5,4 @@ pub mod users;
 pub mod submissions;
 pub mod vote_assignments;
 pub mod votes;
+pub mod scores;
