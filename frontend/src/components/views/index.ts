@@ -10,3 +10,4 @@ export { SubmissionComplete } from "./SubmissionComplete";
 export { SubmissionPreviewModal } from "./SubmissionPreviewModal";
 export { type VoteScores, VotingModal } from "./VotingModal";
 export { VotingGalleryView } from "./VotingGalleryView";
+export { VotingNotEligibleView } from "./VotingNotEligibleView";

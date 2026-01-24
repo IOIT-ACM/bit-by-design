@@ -1,5 +1,5 @@
+pub use super::_entities::vote_assignments::{ActiveModel, Entity, Model};
 use sea_orm::entity::prelude::*;
-pub use super::_entities::vote_assignments::{ActiveModel, Model, Entity};
 pub type VoteAssignments = Entity;
 
 #[async_trait::async_trait]

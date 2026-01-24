@@ -1,14 +1,15 @@
 #![allow(clippy::missing_errors_doc)]
 #![allow(clippy::unnecessary_struct_initialization)]
 #![allow(clippy::unused_async)]
+use chrono::Local;
 use loco_rs::controller::extractor::auth;
 use loco_rs::prelude::*;
-use sea_orm::{Condition, Related};
+use sea_orm::Condition;
 use serde::{Deserialize, Serialize};
 
 use crate::models::{
     _entities::vote_assignments,
-    admins,
+    admins, configs,
     submissions::{self, ActiveModel, Entity, Model},
     users,
 };
@@ -49,7 +50,7 @@ async fn load_item(ctx: &AppContext, id: i32) -> Result<Model> {
 // pub async fn list(State(ctx): State<AppContext>) -> Result<Response> {
 //     format::json(Entity::find().all(&ctx.db).await?)
 // }
-//TODO: Only accept submissions during submission period
+///Only accept submissions during submission period
 #[debug_handler]
 pub async fn add(
     auth: auth::JWT,
@@ -58,17 +59,26 @@ pub async fn add(
 ) -> Result<Response> {
     let user = users::Model::find_by_pid(&ctx.db, &auth.claims.pid).await?;
     let item = submissions::Model::find_by_userid(&ctx.db, user.id).await?;
-    if let Some(_) = item {
+    if item.is_some() {
         return bad_request("submission already exists.");
     }
-
-    let mut item = ActiveModel {
-        ..Default::default()
-    };
-    item.user_id = Set(user.id);
-    params.update(&mut item);
-    let item = item.insert(&ctx.db).await?;
-    format::json(item)
+    let config = configs::Entity::find().one(&ctx.db).await?;
+    if let Some(config) = config {
+        let now = Local::now();
+        let now = DateTimeWithTimeZone::from(now);
+        if let (Some(ss), Some(se)) = (config.submission_start, config.submission_end) {
+            if ss <= now && now <= se {
+                let mut item = ActiveModel {
+                    ..Default::default()
+                };
+                item.user_id = Set(user.id);
+                params.update(&mut item);
+                let item = item.insert(&ctx.db).await?;
+                return format::json(item);
+            }
+        }
+    }
+    bad_request("not submission period yet")
 }
 
 #[debug_handler]
@@ -89,7 +99,7 @@ pub async fn update(
     let item = item.update(&ctx.db).await?;
     format::json(item)
 }
-//TODO: Allow for loading submissions that have been assigned to a particular user.
+///Allow for loading submissions that have been assigned to a particular user.
 #[debug_handler]
 pub async fn get_one(
     auth: auth::JWT,

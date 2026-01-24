@@ -1,7 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useGSAP } from "@gsap/react";
-import { toast } from "react-hot-toast";
 import {
 	Button,
 	Card,
@@ -23,7 +22,6 @@ const RESEND_SUCCESS_TIMEOUT = 3000;
 function LoginPage() {
 	const navigate = useNavigate();
 	const [shake, setShake] = useState(false);
-	const [showVerificationError, setShowVerificationError] = useState(false);
 	const { setAuth } = useAuth();
 
 	const animations = useLoginAnimations();
@@ -43,23 +41,16 @@ function LoginPage() {
 	// Register GSAP context
 	useGSAP(() => {}, { scope: animations.containerRef });
 
-	// Trigger toast and persistent error message on login error
+	// Trigger shake animation on error
 	useEffect(() => {
-		if (login.error) {
+		if (login.hasError) {
 			setShake(true);
-			toast.error("Account credentials not found.");
-
-			// If the error happens during the email stage, show the persistent help message
-			if (login.step === "email") {
-				setShowVerificationError(true);
-			}
-
 			const timer = setTimeout(() => setShake(false), 400);
 			return () => clearTimeout(timer);
 		}
-	}, [login.error]);
+	}, [login.hasError]);
 
-	// Animate message appearance (for OTP step messages)
+	// Animate message appearance
 	useEffect(() => {
 		if (login.error || login.resendSuccess) {
 			animations.animateMessageIn();
@@ -82,9 +73,7 @@ function LoginPage() {
 		e.preventDefault();
 		const success = await login.requestOtp();
 		if (success) {
-			animations.transitionToOtp(() => {
-				setShowVerificationError(false);
-			});
+			animations.transitionToOtp(() => {});
 		}
 	};
 
@@ -115,32 +104,12 @@ function LoginPage() {
 						</CardDescription>
 
 						{login.step === "email" ? (
-							<div className="flex flex-col gap-4">
-								<EmailForm
-									email={login.email}
-									onEmailChange={login.updateEmail}
-									onSubmit={handleRequestOtp}
-									isLoading={login.isLoading}
-									shake={shake}
-								/>
-
-								{showVerificationError && (
-									<div className="mt-2 animate-in fade-in slide-in-from-top-1 duration-300">
-										<p className="font-['Figtree',sans-serif] text-[11px] leading-relaxed text-[#8d2727] text-center bg-[#fef2f2] border border-[#fecaca] p-3 rounded-lg">
-											The email has not been verified. If you think it's a
-											mistake, please contact{" "}
-											<a
-												href={`https://wa.me/918999543661?text=${encodeURIComponent(`Hello Sarvesh, my email is not verified on Bit by Design. Can you please check? My email is: ${login.email}`)}`}
-												target="_blank"
-												rel="noopener noreferrer"
-												className="font-bold underline hover:text-[#a22121] transition-colors"
-											>
-												Sarvesh Kolte
-											</a>
-										</p>
-									</div>
-								)}
-							</div>
+							<EmailForm
+								email={login.email}
+								onEmailChange={login.updateEmail}
+								onSubmit={handleRequestOtp}
+								isLoading={login.isLoading}
+							/>
 						) : (
 							<OtpForm
 								email={login.email}
@@ -173,7 +142,6 @@ interface EmailFormProps {
 	onEmailChange: (value: string) => void;
 	onSubmit: (e: FormEvent) => void;
 	isLoading: boolean;
-	shake?: boolean;
 }
 
 function EmailForm({
@@ -181,7 +149,6 @@ function EmailForm({
 	onEmailChange,
 	onSubmit,
 	isLoading,
-	shake,
 }: EmailFormProps) {
 	return (
 		<form onSubmit={onSubmit} className="space-y-3">
@@ -193,7 +160,6 @@ function EmailForm({
 				required
 				disabled={isLoading}
 				autoFocus
-				shake={shake}
 			/>
 			<Button type="submit" isLoading={isLoading}>
 				Get OTP

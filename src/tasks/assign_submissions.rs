@@ -15,7 +15,6 @@ impl Task for AssignSubmissions {
             detail: "Assigns submissions to users so they can vote on them.".to_string(),
         }
     }
-    //TODO: store k in configs table
     async fn run(&self, ctx: &AppContext, _vars: &task::Vars) -> Result<()> {
         let mut all_submissions = submissions::Entity::find().all(&ctx.db).await?;
         let all_users = submissions::Entity::find()
@@ -29,7 +28,7 @@ impl Task for AssignSubmissions {
             .exec(&ctx.db)
             .await?;
 
-        let n_submissions = all_submissions.iter().count();
+        let n_submissions = all_submissions.len();
         // let n_users = all_submissions.iter().count();
         let k = min(6, n_submissions - 1);
         let txn = ctx.db.begin().await?;

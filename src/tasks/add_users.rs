@@ -25,7 +25,7 @@ impl Task for AddUsers {
                             let email = record[2].to_string();
                             let name = record[1].to_string();
                             let existing_user = users::Model::find_by_email(&ctx.db, &email).await;
-                            if let Ok(_) = existing_user {
+                            if existing_user.is_ok() {
                                 println!("The user already exists.");
                                 continue;
                             }
@@ -46,8 +46,8 @@ impl Task for AddUsers {
             }
         }
         if let (Ok(email), Ok(name)) = (email, name) {
-            let existing_user = users::Model::find_by_email(&ctx.db, &email).await;
-            if let Ok(_) = existing_user {
+            let existing_user = users::Model::find_by_email(&ctx.db, email).await;
+            if existing_user.is_ok() {
                 panic!("The user already exists.");
             }
             let user = users::ActiveModel {

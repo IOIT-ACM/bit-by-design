@@ -13,6 +13,8 @@ interface ApiOptions {
     data?: unknown;
     token?: string | null;
     headers?: Record<string, string>;
+    /** HTTP status codes for which error toasts should be suppressed */
+    suppressToastOn?: number[];
 }
 
 // --- Utilities ---
@@ -25,8 +27,13 @@ export async function apiFetch<T>(
     endpoint: string,
     options: ApiOptions = {},
 ): Promise<T> {
-    console.log("Reached this point.");
-    const { method = "POST", data, token = getStoredToken(), headers = {} } = options;
+    const {
+        method = "POST",
+        data,
+        token = getStoredToken(),
+        headers = {},
+        suppressToastOn = [],
+    } = options;
 
     const requestHeaders: Record<string, string> = {
         "Content-Type": "application/json",
@@ -43,25 +50,29 @@ export async function apiFetch<T>(
             headers: requestHeaders,
             body: data ? JSON.stringify(data) : undefined,
         });
-        console.log(response);
-
-        if (response.status === 401) {
-            // Optional: Handle unauthorized globally (e.g., redirect to login)
-            // For now, just throw error
-        }
-
         if (!response.ok) {
+            const status = response.status;
             const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || errorData.error || `Request failed with status ${response.status}`);
+            const message = errorData.message ||
+                errorData.error ||
+                `Request failed with status ${status}`;
+
+            // Only show toast if status is not in suppressToastOn list
+            if (!suppressToastOn.includes(status)) {
+                toast.error(message);
+            }
+
+            throw new Error(message);
         }
 
         // Handle empty responses
         const text = await response.text();
         return text ? JSON.parse(text) : ({} as T);
-
     } catch (error) {
-        // Log error or show toast?
-        toast.error(error instanceof Error ? error.message : "An error occurred");
+        // Network errors (not HTTP errors) still show toast
+        if (error instanceof TypeError) {
+            toast.error("Network error. Please check your connection.");
+        }
         throw error;
     }
 }

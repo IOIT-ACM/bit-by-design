@@ -1,5 +1,5 @@
+pub use super::_entities::scores::{ActiveModel, Entity, Model};
 use sea_orm::entity::prelude::*;
-pub use super::_entities::scores::{ActiveModel, Model, Entity};
 pub type Scores = Entity;
 
 #[async_trait::async_trait]

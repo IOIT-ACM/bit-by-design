@@ -1,8 +1,8 @@
 pub mod _entities;
 pub mod admins;
 pub mod configs;
-pub mod users;
+pub mod scores;
 pub mod submissions;
+pub mod users;
 pub mod vote_assignments;
 pub mod votes;
-pub mod scores;

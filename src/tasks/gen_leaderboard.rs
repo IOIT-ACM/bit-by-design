@@ -10,13 +10,13 @@ struct CriterionScores<T> {
     originality: T,
     overall_quality: T,
 }
-fn median(values: &mut Vec<i32>) -> f32 {
+fn median(values: &mut [i32]) -> f32 {
     values.sort();
     let n = values.len();
-    if n % 2 != 0 {
-        return values[n / 2] as f32;
+    if !n.is_multiple_of(2) {
+        values[n / 2] as f32
     } else {
-        return ((values[n / 2 - 1] + values[n / 2]) / 2) as f32;
+        ((values[n / 2 - 1] + values[n / 2]) / 2) as f32
     }
 }
 pub struct GenLeaderboard;
@@ -47,13 +47,13 @@ impl Task for GenLeaderboard {
                     .overall_quality
                     .push(vote.overall_quality_score);
             }
-            let mut final_scores: CriterionScores<f32> = Default::default();
-            final_scores.problem_fit = median(&mut aggregate_scores.problem_fit) * 0.25;
-            final_scores.clarity = median(&mut aggregate_scores.clarity) * 0.20;
-            final_scores.style_interpretation =
-                median(&mut aggregate_scores.style_interpretation) * 0.20;
-            final_scores.originality = median(&mut aggregate_scores.originality) * 0.15;
-            final_scores.overall_quality = median(&mut aggregate_scores.overall_quality) * 0.20;
+            let final_scores = CriterionScores::<f32> {
+                problem_fit: median(&mut aggregate_scores.problem_fit) * 0.25,
+                clarity: median(&mut aggregate_scores.clarity) * 0.20,
+                style_interpretation: median(&mut aggregate_scores.style_interpretation) * 0.20,
+                originality: median(&mut aggregate_scores.originality) * 0.15,
+                overall_quality: median(&mut aggregate_scores.overall_quality) * 0.20,
+            };
 
             let weighted_score = final_scores.problem_fit
                 + final_scores.clarity

@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use chrono::{Local, TimeDelta, Timelike};
+use chrono::{Local, TimeDelta};
 use loco_rs::prelude::*;
 use sea_orm::prelude::ChronoDateTimeWithTimeZone;
 

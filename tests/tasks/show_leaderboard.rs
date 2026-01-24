@@ -9,9 +9,11 @@ use serial_test::serial;
 async fn test_can_run_show_leaderboard() {
     let boot = boot_test::<App>().await.unwrap();
 
-    assert!(
-        run_task::<App>(&boot.app_context, Some(&"show_leaderboard".to_string()), &task::Vars::default())
-            .await
-            .is_ok()
-    );
+    assert!(run_task::<App>(
+        &boot.app_context,
+        Some(&"show_leaderboard".to_string()),
+        &task::Vars::default()
+    )
+    .await
+    .is_ok());
 }

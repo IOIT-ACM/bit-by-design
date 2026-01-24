@@ -9,6 +9,7 @@ import {
 	SubmissionsOpenView,
 	SubmissionsClosedView,
 	VotingGalleryView,
+	VotingNotEligibleView,
 	CompetitionInstructionsButton,
 	CompetitionInstructionsModal,
 } from "../components/views";
@@ -98,6 +99,13 @@ function Index() {
 				);
 
 			case "voting_open":
+				if (!hasSubmission) {
+					return (
+						<VotingNotEligibleView
+							timeRemaining={formatTimeRemaining(hours, minutes)}
+						/>
+					);
+				}
 				if (assignmentsLoading) {
 					return (
 						<div className="flex flex-col items-center justify-center p-12">

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiFetch } from "./client";
+import { apiFetch, getStoredToken } from "./client";
 
 // --- Types ---
 export interface SubmissionParams {
@@ -51,9 +51,12 @@ async function updateSubmission(
 
 async function checkMySubmission(): Promise<SubmissionResponse | null> {
     try {
-        return await apiFetch("/submissions/mine", { method: "GET" });
+        return await apiFetch("/submissions/mine", {
+            method: "GET",
+            suppressToastOn: [404],
+        });
     } catch {
-        // If 404, returns null to indicate no submission
+        // If 404 or other error, return null to indicate no submission
         return null;
     }
 }
@@ -86,9 +89,11 @@ export function useUpdateSubmission() {
 }
 
 export function useMySubmission() {
+    const hasToken = !!getStoredToken();
     return useQuery({
         queryKey: subkeys.mine(),
         queryFn: checkMySubmission,
         retry: false,
+        enabled: hasToken,
     });
 }

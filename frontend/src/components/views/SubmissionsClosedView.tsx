@@ -100,8 +100,8 @@ export function SubmissionsClosedView({
 								<div>
 									<CardTitle className="text-lg">Submissions Closed</CardTitle>
 									<CardDescription className="mt-2">
-										Unfortunately, the submission period has ended. You can
-										still participate in voting once it begins.
+										The submission period has ended and you did not submit. You
+										won't be eligible to vote in this competition.
 									</CardDescription>
 								</div>
 							</>

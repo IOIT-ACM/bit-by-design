@@ -9,9 +9,11 @@ use serial_test::serial;
 async fn test_can_run_assign_submissions() {
     let boot = boot_test::<App>().await.unwrap();
 
-    assert!(
-        run_task::<App>(&boot.app_context, Some(&"assign_submissions".to_string()), &task::Vars::default())
-            .await
-            .is_ok()
-    );
+    assert!(run_task::<App>(
+        &boot.app_context,
+        Some(&"assign_submissions".to_string()),
+        &task::Vars::default()
+    )
+    .await
+    .is_ok());
 }

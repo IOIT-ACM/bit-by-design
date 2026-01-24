@@ -4,7 +4,10 @@
 use loco_rs::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::models::_entities::scores::{ActiveModel, Entity, Model};
+use crate::models::{
+    _entities::scores::{ActiveModel, Entity, Model},
+    configs,
+};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Params {
@@ -36,7 +39,15 @@ async fn load_item(ctx: &AppContext, id: i32) -> Result<Model> {
 
 #[debug_handler]
 pub async fn list(State(ctx): State<AppContext>) -> Result<Response> {
-    format::json(Entity::find().all(&ctx.db).await?)
+    let config = configs::Entity::find().one(&ctx.db).await?;
+    if let Some(config) = config {
+        if config.show_leaderboard {
+            return format::json(Entity::find().all(&ctx.db).await?);
+        } else {
+            return not_found();
+        }
+    }
+    not_found()
 }
 
 #[debug_handler]

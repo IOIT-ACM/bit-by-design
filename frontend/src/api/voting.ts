@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiFetch } from "./client";
+import { apiFetch, getStoredToken } from "./client";
 import type { SubmissionResponse } from "./submissions";
 
 // --- Types ---
@@ -109,10 +109,12 @@ export const votingKeys = {
  * Fetch user's vote assignments
  */
 export function useMyAssignments() {
+    const hasToken = !!getStoredToken();
     return useQuery({
         queryKey: votingKeys.assignments(),
         queryFn: fetchMyAssignments,
         retry: 1,
+        enabled: hasToken,
     });
 }
 
@@ -120,10 +122,12 @@ export function useMyAssignments() {
  * Fetch user's existing votes
  */
 export function useMyVotes() {
+    const hasToken = !!getStoredToken();
     return useQuery({
         queryKey: votingKeys.myVotes(),
         queryFn: fetchMyVotes,
         retry: false,
+        enabled: hasToken,
     });
 }
 

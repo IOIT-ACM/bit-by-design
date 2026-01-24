@@ -20,6 +20,31 @@ pub struct Params {
 }
 
 impl Params {
+    /// Validates that all score fields are between 0 and 5 (inclusive).
+    fn validate(&self) -> Result<()> {
+        let scores = [
+            ("problem_fit_score", self.problem_fit_score),
+            ("clarity_score", self.clarity_score),
+            (
+                "style_interpretation_score",
+                self.style_interpretation_score,
+            ),
+            ("originality_score", self.originality_score),
+            ("overall_quality_score", self.overall_quality_score),
+        ];
+
+        for (name, value) in scores {
+            if !(0..=5).contains(&value) {
+                return Err(Error::BadRequest(format!(
+                    "{} must be between 0 and 5, got {}",
+                    name, value
+                )));
+            }
+        }
+
+        Ok(())
+    }
+
     fn update(&self, item: &mut ActiveModel, user_id: i32) {
         item.user_id = Set(user_id);
         item.submission_id = Set(self.submission_id);
@@ -60,7 +85,7 @@ pub async fn add(
     Json(params): Json<Params>,
 ) -> Result<Response> {
     let user = users::Model::find_by_pid(&ctx.db, &auth.claims.pid).await?;
-    //TODO: Validate params values (scores between 0-5)
+    params.validate()?;
     let mut item = ActiveModel {
         ..Default::default()
     };
@@ -82,6 +107,7 @@ pub async fn update(
     if item.user_id != user.id {
         return unauthorized("unauthorized access.");
     }
+    params.validate()?;
     let mut item = item.into_active_model();
     params.update(&mut item, user.id);
     let item = item.update(&ctx.db).await?;
