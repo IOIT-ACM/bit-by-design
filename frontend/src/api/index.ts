@@ -29,9 +29,18 @@ export {
     useAssignedSubmissions,
     useMyAssignments,
     useMyVotes,
+    useSubmission,
     useSubmitVote,
     type VoteAssignment,
     type VoteParams,
     type VoteResponse,
     votingKeys,
 } from "./voting";
+
+export {
+    type LeaderboardEntry,
+    type LeaderboardEntryWithSubmission,
+    leaderboardKeys,
+    useLeaderboard,
+    useLeaderboardWithSubmissions,
+} from "./leaderboard";

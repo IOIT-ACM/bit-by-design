@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import { DashboardLayout } from "../components/layouts";
 import { SubmissionsBackground, Spinner } from "../components/ui";
+import { votingKeys } from "../api/voting";
 import {
 	CountdownView,
 	CompetitionOverView,
@@ -24,8 +26,19 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-	const { hours, minutes, seconds, isLoading, state, label } = useCountdown();
+	const { hours, minutes, seconds, isLoading, state, status, label } = useCountdown();
 	const [isInstructionsOpen, setIsInstructionsOpen] = useState(false);
+	const queryClient = useQueryClient();
+	const prevStateRef = useRef(state);
+
+	// Auto-refetch voting assignments when state changes to voting_open
+	useEffect(() => {
+		if (prevStateRef.current !== state && state === "voting_open") {
+			// Invalidate and refetch voting assignments
+			queryClient.invalidateQueries({ queryKey: votingKeys.all });
+		}
+		prevStateRef.current = state;
+	}, [state, queryClient]);
 
 	// Fetch user's submission to know if they submitted
 	const { data: mySubmission } = useMySubmission();
@@ -83,7 +96,7 @@ function Index() {
 
 		switch (state) {
 			case "competition_over":
-				return <CompetitionOverView />;
+				return <CompetitionOverView showLeaderboard={status?.config.show_leaderboard ?? false} />;
 
 			case "submissions_open":
 				return <SubmissionsOpenView hours={hours} minutes={minutes} />;

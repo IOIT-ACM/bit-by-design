@@ -111,6 +111,7 @@ export function VotingModal({
 }: VotingModalProps) {
 	const overlayRef = useRef<HTMLDivElement>(null);
 	const modalRef = useRef<HTMLDivElement>(null);
+	const [showFullImage, setShowFullImage] = useState(false);
 
 	// Extract submission data
 	const { submission, existingVote } = assignment;
@@ -231,13 +232,14 @@ export function VotingModal({
 							</button>
 						</div>
 
-						{/* Design Image */}
+						{/* Design Image - Clickable for full preview */}
 						<div className="relative w-full aspect-video rounded-lg overflow-hidden bg-[#f5f5f5] border border-[rgba(64,64,64,0.31)]">
 							{submission.design_image ? (
 								<img
 									src={submission.design_image}
 									alt="Submission Design"
-									className="w-full h-full object-cover"
+									className="w-full h-full object-cover cursor-zoom-in hover:opacity-90 transition-opacity"
+									onClick={() => setShowFullImage(true)}
 								/>
 							) : (
 								<div className="w-full h-full flex items-center justify-center text-[#bababa] font-['Figtree',sans-serif] text-sm">
@@ -245,6 +247,39 @@ export function VotingModal({
 								</div>
 							)}
 						</div>
+
+						{/* Full-screen image lightbox */}
+						{showFullImage && submission.design_image && (
+							<div
+								className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 p-4 cursor-zoom-out"
+								onClick={() => setShowFullImage(false)}
+							>
+								<img
+									src={submission.design_image}
+									alt="Submission Design Full Preview"
+									className="max-w-full max-h-full object-contain"
+								/>
+								<button
+									type="button"
+									onClick={() => setShowFullImage(false)}
+									className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors p-2"
+									aria-label="Close full image preview"
+								>
+									<svg
+										width="24"
+										height="24"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										strokeWidth="2"
+										strokeLinecap="round"
+										strokeLinejoin="round"
+									>
+										<path d="M18 6L6 18M6 6l12 12" />
+									</svg>
+								</button>
+							</div>
+						)}
 
 						{/* Design Rationale - Collapsible */}
 						<details className="group">

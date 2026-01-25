@@ -303,7 +303,8 @@ export function SubmissionForm({
 					imageUrl = uploadRes.secure_url;
 					setCurrentImageUrl(imageUrl);
 					toast.success("Image uploaded!", { id: uploadToastId });
-				} catch {
+				} catch (err) {
+					console.error("Cloudinary upload failed:", err);
 					toast.error("Failed to upload image. Please try again.", {
 						id: uploadToastId,
 					});

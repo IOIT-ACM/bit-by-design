@@ -11,3 +11,4 @@ export { SubmissionPreviewModal } from "./SubmissionPreviewModal";
 export { type VoteScores, VotingModal } from "./VotingModal";
 export { VotingGalleryView } from "./VotingGalleryView";
 export { VotingNotEligibleView } from "./VotingNotEligibleView";
+export { LeaderboardView } from "./LeaderboardView";

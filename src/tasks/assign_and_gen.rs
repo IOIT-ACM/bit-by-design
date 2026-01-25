@@ -31,6 +31,7 @@ impl Task for AssignAndGen {
                     let _ = assign_task.run(ctx, _vars).await;
                     let mut config = config.clone().into_active_model();
                     config.assigned = Set(true);
+                    config.save(&ctx.db).await?;
                 }
             }
             // Only run gen_leaderboard if voting period has ended and we haven't generated yet
@@ -45,6 +46,7 @@ impl Task for AssignAndGen {
                     let _ = gen_task.run(ctx, _vars).await;
                     let mut config = config.into_active_model();
                     config.created_scores = Set(true);
+                    config.save(&ctx.db).await?;
                 }
             }
         } else {

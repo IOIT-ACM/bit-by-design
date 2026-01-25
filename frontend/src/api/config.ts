@@ -13,6 +13,7 @@ export interface CompetitionConfig {
     submission_end: string | null;
     voting_start: string | null;
     voting_end: string | null;
+    show_leaderboard: boolean;
 }
 
 /**
@@ -47,6 +48,7 @@ function getMockConfig(): CompetitionConfig {
         submission_end: new Date(now + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
         voting_start: new Date(now + 8 * 24 * 60 * 60 * 1000).toISOString(), // 8 days
         voting_end: new Date(now + 14 * 24 * 60 * 60 * 1000).toISOString(), // 14 days
+        show_leaderboard: false,
     };
 }
 

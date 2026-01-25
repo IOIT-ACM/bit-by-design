@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import gsap from "gsap";
 import { Card, CardTitle, CardDescription, Button } from "../ui";
 import type { SubmissionFormData } from "../forms";
@@ -22,6 +22,7 @@ export function SubmissionPreviewModal({
 }: SubmissionPreviewModalProps) {
 	const overlayRef = useRef<HTMLDivElement>(null);
 	const modalRef = useRef<HTMLDivElement>(null);
+	const [showFullImage, setShowFullImage] = useState(false);
 
 	// Entrance animation
 	useEffect(() => {
@@ -119,7 +120,10 @@ export function SubmissionPreviewModal({
 						</div>
 
 						{/* Design Image */}
-						<div className="relative w-full aspect-video rounded-lg overflow-hidden bg-[#f5f5f5] border border-[rgba(64,64,64,0.31)]">
+						<div
+							className={`relative w-full aspect-video rounded-lg overflow-hidden bg-[#f5f5f5] border border-[rgba(64,64,64,0.31)] ${imageUrl ? "cursor-zoom-in hover:opacity-90 transition-opacity" : ""}`}
+							onClick={() => imageUrl && setShowFullImage(true)}
+						>
 							{imageUrl ? (
 								<img
 									src={imageUrl}
@@ -185,6 +189,40 @@ export function SubmissionPreviewModal({
 					</div>
 				</Card>
 			</div>
+
+			{/* Full Image Lightbox */}
+			{showFullImage && imageUrl && (
+				<div
+					className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 cursor-zoom-out p-4"
+					onClick={() => setShowFullImage(false)}
+				>
+					<button
+						type="button"
+						onClick={() => setShowFullImage(false)}
+						className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors p-2 z-10"
+						aria-label="Close full image"
+					>
+						<svg
+							width="28"
+							height="28"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth="2"
+							strokeLinecap="round"
+							strokeLinejoin="round"
+						>
+							<path d="M18 6L6 18M6 6l12 12" />
+						</svg>
+					</button>
+					<img
+						src={imageUrl}
+						alt="Full size submission design"
+						className="max-w-full max-h-full object-contain rounded-lg"
+						onClick={(e) => e.stopPropagation()}
+					/>
+				</div>
+			)}
 		</div>
 	);
 }

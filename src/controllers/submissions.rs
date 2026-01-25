@@ -7,11 +7,14 @@ use loco_rs::prelude::*;
 use sea_orm::Condition;
 use serde::{Deserialize, Serialize};
 
-use crate::models::{
-    _entities::vote_assignments,
-    admins, configs,
-    submissions::{self, ActiveModel, Entity, Model},
-    users,
+use crate::{
+    models::{
+        _entities::vote_assignments,
+        admins, configs,
+        submissions::{self, ActiveModel, Entity, Model},
+        users,
+    },
+    tasks::show_leaderboard,
 };
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -117,10 +120,16 @@ pub async fn get_one(
         )
         .one(&ctx.db)
         .await?;
-    if item.user_id != user.id && !is_admin && assignment.is_none() {
-        return unauthorized("unauthorized access.");
+    let config = configs::Entity::find().one(&ctx.db).await?;
+    let mut show_leaderboard = false;
+    if let Some(config) = config {
+        show_leaderboard = config.show_leaderboard;
     }
-    format::json(item)
+    if is_admin || item.user_id == user.id || assignment.is_some() || show_leaderboard {
+        return format::json(item);
+    }
+
+    return unauthorized("unauthorized access.");
 }
 
 #[debug_handler]

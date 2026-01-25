@@ -1,7 +1,8 @@
 // --- Configuration ---
 const CLOUDINARY_CONFIG = {
-    cloudName: import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME,
-    uploadPreset: import.meta.env.PUBLIC_CLOUDINARY_UPLOAD_PRESET,
+    cloudName: import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME || "dsjstb47y",
+    uploadPreset: import.meta.env.PUBLIC_CLOUDINARY_UPLOAD_PRESET ||
+        "bit-by-design",
 } as const;
 
 export interface CloudinaryUploadResponse {
@@ -18,10 +19,16 @@ export interface CloudinaryUploadResponse {
  * @param file The file to upload
  * @returns The upload response from Cloudinary
  */
-export async function uploadToCloudinary(file: File): Promise<CloudinaryUploadResponse> {
+export async function uploadToCloudinary(
+    file: File,
+): Promise<CloudinaryUploadResponse> {
     if (!CLOUDINARY_CONFIG.cloudName || !CLOUDINARY_CONFIG.uploadPreset) {
-        console.log("Cloudinary configuration is missing. Please check your environment variables.");
-        throw new Error("Cloudinary configuration is missing. Please check your environment variables.");
+        console.log(
+            "Cloudinary configuration is missing. Please check your environment variables.",
+        );
+        throw new Error(
+            "Cloudinary configuration is missing. Please check your environment variables.",
+        );
     }
 
     const formData = new FormData();
@@ -29,7 +36,7 @@ export async function uploadToCloudinary(file: File): Promise<CloudinaryUploadRe
     formData.append("upload_preset", CLOUDINARY_CONFIG.uploadPreset);
 
     const folderName = "bit-by-design-submissions";
-     formData.append("folder", folderName);
+    formData.append("folder", folderName);
 
     try {
         const response = await fetch(
@@ -37,7 +44,7 @@ export async function uploadToCloudinary(file: File): Promise<CloudinaryUploadRe
             {
                 method: "POST",
                 body: formData,
-            }
+            },
         );
 
         if (!response.ok) {

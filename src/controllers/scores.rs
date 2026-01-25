@@ -5,7 +5,10 @@ use loco_rs::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::models::{
-    _entities::scores::{ActiveModel, Entity, Model},
+    _entities::{
+        scores::{ActiveModel, Entity, Model},
+        submissions, users,
+    },
     configs,
 };
 
@@ -18,6 +21,22 @@ pub struct Params {
     pub originality_score: i32,
     pub overall_quality_score: i32,
     pub final_score: i32,
+}
+
+/// Response struct that includes score data along with user name
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ScoreWithUser {
+    pub id: i32,
+    pub submission_id: i32,
+    pub problem_fit_score: i32,
+    pub visual_clarity_score: i32,
+    pub style_interpretation_score: i32,
+    pub originality_score: i32,
+    pub overall_quality_score: i32,
+    pub final_score: i32,
+    pub user_name: String,
+    pub created_at: DateTimeWithTimeZone,
+    pub updated_at: DateTimeWithTimeZone,
 }
 
 impl Params {
@@ -42,7 +61,43 @@ pub async fn list(State(ctx): State<AppContext>) -> Result<Response> {
     let config = configs::Entity::find().one(&ctx.db).await?;
     if let Some(config) = config {
         if config.show_leaderboard {
-            return format::json(Entity::find().all(&ctx.db).await?);
+            // Fetch all scores
+            let scores = Entity::find().all(&ctx.db).await?;
+            
+            // Build response with user names
+            let mut scores_with_users: Vec<ScoreWithUser> = Vec::new();
+            
+            for score in scores {
+                // Get submission for this score
+                let submission = submissions::Entity::find_by_id(score.submission_id)
+                    .one(&ctx.db)
+                    .await?;
+                
+                if let Some(submission) = submission {
+                    // Get user for this submission
+                    let user = users::Entity::find_by_id(submission.user_id)
+                        .one(&ctx.db)
+                        .await?;
+                    
+                    let user_name = user.map(|u| u.name).unwrap_or_else(|| "Unknown".to_string());
+                    
+                    scores_with_users.push(ScoreWithUser {
+                        id: score.id,
+                        submission_id: score.submission_id,
+                        problem_fit_score: score.problem_fit_score,
+                        visual_clarity_score: score.visual_clarity_score,
+                        style_interpretation_score: score.style_interpretation_score,
+                        originality_score: score.originality_score,
+                        overall_quality_score: score.overall_quality_score,
+                        final_score: score.final_score,
+                        user_name,
+                        created_at: score.created_at,
+                        updated_at: score.updated_at,
+                    });
+                }
+            }
+            
+            return format::json(scores_with_users);
         } else {
             return not_found();
         }
