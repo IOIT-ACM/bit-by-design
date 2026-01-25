@@ -7,6 +7,8 @@ interface CompetitionOverViewProps {
 /**
  * Competition over view - shows leaderboard when enabled
  */
-export function CompetitionOverView({ showLeaderboard }: CompetitionOverViewProps) {
+export function CompetitionOverView({
+	showLeaderboard,
+}: CompetitionOverViewProps) {
 	return <LeaderboardView showLeaderboard={showLeaderboard} />;
 }

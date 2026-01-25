@@ -54,13 +54,19 @@ export function useLeaderboard(enabled: boolean = true) {
  * Fetch leaderboard with full submission data for each entry
  */
 export function useLeaderboardWithSubmissions(enabled: boolean = true) {
-    const { data: scores, isLoading: scoresLoading, error: scoresError } = useLeaderboard(enabled);
+    const { data: scores, isLoading: scoresLoading, error: scoresError } =
+        useLeaderboard(enabled);
 
     const { data: submissions, isLoading: submissionsLoading } = useQuery({
-        queryKey: [...leaderboardKeys.withSubmissions(), scores?.map(s => s.submission_id)],
+        queryKey: [
+            ...leaderboardKeys.withSubmissions(),
+            scores?.map((s) => s.submission_id),
+        ],
         queryFn: async () => {
             if (!scores || scores.length === 0) return [];
-            const submissionPromises = scores.map(s => fetchSubmission(s.submission_id));
+            const submissionPromises = scores.map((s) =>
+                fetchSubmission(s.submission_id)
+            );
             return Promise.all(submissionPromises);
         },
         enabled: !!scores && scores.length > 0,

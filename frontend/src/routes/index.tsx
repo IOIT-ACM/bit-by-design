@@ -26,7 +26,8 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-	const { hours, minutes, seconds, isLoading, state, status, label } = useCountdown();
+	const { hours, minutes, seconds, isLoading, state, status, label } =
+		useCountdown();
 	const [isInstructionsOpen, setIsInstructionsOpen] = useState(false);
 	const queryClient = useQueryClient();
 	const prevStateRef = useRef(state);
@@ -96,7 +97,11 @@ function Index() {
 
 		switch (state) {
 			case "competition_over":
-				return <CompetitionOverView showLeaderboard={status?.config.show_leaderboard ?? false} />;
+				return (
+					<CompetitionOverView
+						showLeaderboard={status?.config.show_leaderboard ?? false}
+					/>
+				);
 
 			case "submissions_open":
 				return <SubmissionsOpenView hours={hours} minutes={minutes} />;

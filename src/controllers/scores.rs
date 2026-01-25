@@ -63,24 +63,26 @@ pub async fn list(State(ctx): State<AppContext>) -> Result<Response> {
         if config.show_leaderboard {
             // Fetch all scores
             let scores = Entity::find().all(&ctx.db).await?;
-            
+
             // Build response with user names
             let mut scores_with_users: Vec<ScoreWithUser> = Vec::new();
-            
+
             for score in scores {
                 // Get submission for this score
                 let submission = submissions::Entity::find_by_id(score.submission_id)
                     .one(&ctx.db)
                     .await?;
-                
+
                 if let Some(submission) = submission {
                     // Get user for this submission
                     let user = users::Entity::find_by_id(submission.user_id)
                         .one(&ctx.db)
                         .await?;
-                    
-                    let user_name = user.map(|u| u.name).unwrap_or_else(|| "Unknown".to_string());
-                    
+
+                    let user_name = user
+                        .map(|u| u.name)
+                        .unwrap_or_else(|| "Unknown".to_string());
+
                     scores_with_users.push(ScoreWithUser {
                         id: score.id,
                         submission_id: score.submission_id,
@@ -96,7 +98,7 @@ pub async fn list(State(ctx): State<AppContext>) -> Result<Response> {
                     });
                 }
             }
-            
+
             return format::json(scores_with_users);
         } else {
             return not_found();

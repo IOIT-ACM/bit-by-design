@@ -1,6 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import gsap from "gsap";
-import { useLeaderboard, type LeaderboardEntry, useSubmission } from "../../api";
+import {
+	useLeaderboard,
+	type LeaderboardEntry,
+	useSubmission,
+} from "../../api";
 import { Card, Button, Spinner } from "../ui";
 import type { SubmissionResponse } from "../../api/submissions";
 
@@ -14,8 +18,14 @@ interface LeaderboardViewProps {
  */
 export function LeaderboardView({ showLeaderboard }: LeaderboardViewProps) {
 	const contentRef = useRef<HTMLDivElement>(null);
-	const { data: leaderboard, isLoading, error } = useLeaderboard(showLeaderboard);
-	const [selectedScore, setSelectedScore] = useState<LeaderboardEntry | null>(null);
+	const {
+		data: leaderboard,
+		isLoading,
+		error,
+	} = useLeaderboard(showLeaderboard);
+	const [selectedScore, setSelectedScore] = useState<LeaderboardEntry | null>(
+		null,
+	);
 
 	useEffect(() => {
 		if (contentRef.current) {
@@ -75,11 +85,17 @@ export function LeaderboardView({ showLeaderboard }: LeaderboardViewProps) {
 	}
 
 	// Sort by final_score descending
-	const sortedLeaderboard = [...leaderboard].sort((a, b) => b.final_score - a.final_score);
+	const sortedLeaderboard = [...leaderboard].sort(
+		(a, b) => b.final_score - a.final_score,
+	);
 
 	return (
 		<>
-			<div ref={contentRef} className="w-full max-w-md mx-auto px-4" style={{ opacity: 0 }}>
+			<div
+				ref={contentRef}
+				className="w-full max-w-md mx-auto px-4"
+				style={{ opacity: 0 }}
+			>
 				{/* Header */}
 				<div className="text-center mb-6 sm:mb-8">
 					<h1 className="font-['Figtree',sans-serif] font-semibold text-2xl sm:text-3xl md:text-4xl text-white mb-2">
@@ -197,14 +213,20 @@ function LeaderboardItem({ rank, entry, onClick }: LeaderboardItemProps) {
 			style={{ opacity: 0 }}
 		>
 			<div className="flex items-center gap-3">
-				<span className={`font-['Figtree',sans-serif] text-[24px] text-center w-6 ${rank > 3 ? `font-medium text-[20px] ${styles.text}` : ""}`}>
+				<span
+					className={`font-['Figtree',sans-serif] text-[24px] text-center w-6 ${rank > 3 ? `font-medium text-[20px] ${styles.text}` : ""}`}
+				>
 					{getRankDisplay()}
 				</span>
-				<span className={`font-['Figtree',sans-serif] font-medium text-[20px] ${styles.text}`}>
+				<span
+					className={`font-['Figtree',sans-serif] font-medium text-[20px] ${styles.text}`}
+				>
 					{entry.user_name}
 				</span>
 			</div>
-			<span className={`font-['Figtree',sans-serif] font-medium text-[20px] ${styles.text}`}>
+			<span
+				className={`font-['Figtree',sans-serif] font-medium text-[20px] ${styles.text}`}
+			>
 				{entry.final_score}
 			</span>
 		</button>
@@ -229,13 +251,18 @@ function RationaleItem({ label, value }: { label: string; value: string }) {
 	);
 }
 
-function SubmissionPreviewModal({ score, onClose }: SubmissionPreviewModalProps) {
+function SubmissionPreviewModal({
+	score,
+	onClose,
+}: SubmissionPreviewModalProps) {
 	const overlayRef = useRef<HTMLDivElement>(null);
 	const modalRef = useRef<HTMLDivElement>(null);
 	const [showFullImage, setShowFullImage] = useState(false);
 
 	// Fetch submission on-demand when modal opens
-	const { data: submission, isLoading: submissionLoading } = useSubmission(score.submission_id);
+	const { data: submission, isLoading: submissionLoading } = useSubmission(
+		score.submission_id,
+	);
 
 	// Entrance animation
 	useEffect(() => {
@@ -312,7 +339,10 @@ function SubmissionPreviewModal({ score, onClose }: SubmissionPreviewModalProps)
 									Submission Preview
 								</h2>
 								<p className="font-['Figtree',sans-serif] text-sm text-[#717171] mt-1 text-left">
-									Final Score: <span className="font-semibold text-[#738f17]">{score.final_score}</span>
+									Final Score:{" "}
+									<span className="font-semibold text-[#738f17]">
+										{score.final_score}
+									</span>
 								</p>
 							</div>
 							<button
@@ -405,23 +435,33 @@ function SubmissionPreviewModal({ score, onClose }: SubmissionPreviewModalProps)
 							<div className="grid grid-cols-2 gap-2 text-sm">
 								<div className="flex justify-between">
 									<span className="text-[#717171]">Problem Fit:</span>
-									<span className="font-medium text-black">{score.problem_fit_score}</span>
+									<span className="font-medium text-black">
+										{score.problem_fit_score}
+									</span>
 								</div>
 								<div className="flex justify-between">
 									<span className="text-[#717171]">Visual Clarity:</span>
-									<span className="font-medium text-black">{score.visual_clarity_score}</span>
+									<span className="font-medium text-black">
+										{score.visual_clarity_score}
+									</span>
 								</div>
 								<div className="flex justify-between">
 									<span className="text-[#717171]">Style Interpretation:</span>
-									<span className="font-medium text-black">{score.style_interpretation_score}</span>
+									<span className="font-medium text-black">
+										{score.style_interpretation_score}
+									</span>
 								</div>
 								<div className="flex justify-between">
 									<span className="text-[#717171]">Originality:</span>
-									<span className="font-medium text-black">{score.originality_score}</span>
+									<span className="font-medium text-black">
+										{score.originality_score}
+									</span>
 								</div>
 								<div className="flex justify-between col-span-2">
 									<span className="text-[#717171]">Overall Quality:</span>
-									<span className="font-medium text-black">{score.overall_quality_score}</span>
+									<span className="font-medium text-black">
+										{score.overall_quality_score}
+									</span>
 								</div>
 							</div>
 						</div>
