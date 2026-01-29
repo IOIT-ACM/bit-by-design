@@ -260,7 +260,7 @@ GitHub Actions runs on every push and PR:
 
 ## License
 
-This project is private and not licensed for public use.
+This project is licensed under the MIT license. Check the LICENSE file.
 
 ## Acknowledgments
 
